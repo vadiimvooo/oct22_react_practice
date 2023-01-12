@@ -46,6 +46,11 @@ export const App: React.FC = () => {
     ));
   }
 
+  const handleClearButton = () => {
+    setQuery('');
+    setFilterByOwner('all');
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -157,7 +162,7 @@ export const App: React.FC = () => {
                 data-cy="ResetAllButton"
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={handleClearButton}
               >
                 Reset all filters
               </a>
@@ -166,7 +171,7 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          {goods.length === 0
+          {visibleGoods.length === 0
             ? (
               <p data-cy="NoMatchingMessage">
                 No products matching selected criteria
