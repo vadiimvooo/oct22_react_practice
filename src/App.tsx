@@ -27,28 +27,49 @@ const goods: Good[] = productsFromServer
   }));
 
 export const App: React.FC = () => {
+  const [products] = useState(goods);
   const [filterByOwner, setFilterByOwner] = useState('all');
   const [query, setQuery] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState(['All']);
 
-  let visibleGoods = goods.filter(good => {
-    if (filterByOwner === 'all') {
-      return good;
-    }
+  const visibleGoods = products.filter(good => {
+    const byOwner = filterByOwner === 'all'
+      ? true
+      : good.user?.name === filterByOwner;
 
-    return good.user?.name === filterByOwner;
+    const byQuery = query
+      ? good.name.toLowerCase().includes(query.toLowerCase())
+      : true;
+
+    const byCategory = !selectedCategories.includes('All')
+      ? selectedCategories.includes(good.category?.title || '')
+      : true;
+
+    return byOwner && byQuery && byCategory;
   });
-
-  if (query) {
-    visibleGoods = visibleGoods.filter(good => (
-      good.name
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    ));
-  }
 
   const handleClearButton = () => {
     setQuery('');
     setFilterByOwner('all');
+    setSelectedCategories(['All']);
+  };
+
+  const handleSelectButton = (buttonName: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes('All') && prev.length === 1) {
+        return [buttonName];
+      }
+
+      if (prev.includes(buttonName)) {
+        if (prev.length === 1) {
+          return ['All'];
+        }
+
+        return prev.filter(name => name !== buttonName);
+      }
+
+      return [...prev, buttonName];
+    });
   };
 
   return (
@@ -120,41 +141,30 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
+                className={cn(
+                  'button is-success mr-6', {
+                    'is-outlined': !selectedCategories.includes('All'),
+                  },
+                )}
+                onClick={() => setSelectedCategories(['All'])}
               >
                 All
               </a>
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 1
-              </a>
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 2
-              </a>
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 3
-              </a>
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 4
-              </a>
+              {categoriesFromServer.map(category => (
+                <a
+                  data-cy="Category"
+                  className={cn(
+                    'button mr-2 my-1',
+                    { 'is-info': selectedCategories.includes(category.title) },
+                  )}
+                  href="#/"
+                  key={category.id}
+                  onClick={() => handleSelectButton(category.title)}
+                >
+                  {category.title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
