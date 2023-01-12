@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
+import cn from 'classnames';
 import { User } from './types/User';
 import { Category } from './types/Category';
 
@@ -26,6 +27,16 @@ const goods: Good[] = productsFromServer
   }));
 
 export const App: React.FC = () => {
+  const [filterByOwner, setFilterByOwner] = useState('all');
+
+  const visibleGoods = goods.filter(good => {
+    if (filterByOwner === 'all') {
+      return good;
+    }
+
+    return good.user?.name === filterByOwner;
+  });
+
   return (
     <div className="section">
       <div className="container">
@@ -39,31 +50,27 @@ export const App: React.FC = () => {
               <a
                 data-cy="FilterAllUsers"
                 href="#/"
+                onClick={() => setFilterByOwner('all')}
+                className={cn({
+                  'is-active': filterByOwner === 'all',
+                })}
               >
                 All
               </a>
 
-              <a
-                data-cy="FilterUser"
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                data-cy="FilterUser"
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                data-cy="FilterUser"
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  data-cy="FilterAllUsers"
+                  href="#/"
+                  key={user.id}
+                  onClick={() => setFilterByOwner(user.name)}
+                  className={cn({
+                    'is-active': filterByOwner === user.name,
+                  })}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -146,11 +153,13 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No products matching selected criteria
-          </p>
-
-          <Table goods={goods} />
+          {goods.length === 0
+            ? (
+              <p data-cy="NoMatchingMessage">
+                No products matching selected criteria
+              </p>
+            )
+            : (<Table goods={visibleGoods} />)}
         </div>
       </div>
     </div>

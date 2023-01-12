@@ -82,7 +82,7 @@ export const Table: React.FC<Props> = ({ goods }) => {
               <td data-cy="ProductName">{name}</td>
               <td data-cy="ProductCategory">
                 {category?.icon}
-                -
+                {' - '}
                 {category?.title}
               </td>
 
