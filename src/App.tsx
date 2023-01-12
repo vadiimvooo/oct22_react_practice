@@ -28,14 +28,23 @@ const goods: Good[] = productsFromServer
 
 export const App: React.FC = () => {
   const [filterByOwner, setFilterByOwner] = useState('all');
+  const [query, setQuery] = useState('');
 
-  const visibleGoods = goods.filter(good => {
+  let visibleGoods = goods.filter(good => {
     if (filterByOwner === 'all') {
       return good;
     }
 
     return good.user?.name === filterByOwner;
   });
+
+  if (query) {
+    visibleGoods = visibleGoods.filter(good => (
+      good.name
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    ));
+  }
 
   return (
     <div className="section">
@@ -80,21 +89,25 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    data-cy="ClearButton"
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {query && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={() => setQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
